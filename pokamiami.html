@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>pokamiami — amira hanifa</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  --lime:#E4F1AC; --green:#A7D477; --pink:#FF748B; --red:#F72C5B;
+  --yellow:#F6FAB9; --black:#111110; --white:#FEFEFE;
+  --serif:'Bricolage Grotesque',sans-serif; --sans:'DM Sans',sans-serif;
+}
+html { scroll-behavior:smooth; }
+body { font-family:var(--sans); background:var(--yellow); color:var(--black); overflow-x:hidden; cursor:none; }
+
+/* CURSOR */
+.dot { position:fixed; width:10px; height:10px; background:var(--red); border-radius:50%; pointer-events:none; z-index:9999; transform:translate(-50%,-50%); transition:transform .1s, background .2s; }
+.ring { position:fixed; width:32px; height:32px; border:1.5px solid var(--black); border-radius:50%; pointer-events:none; z-index:9998; transform:translate(-50%,-50%); transition:opacity .2s; }
+
+/* PAGES */
+.page { display:none; min-height:100vh; flex-direction:column; }
+.page.active { display:flex; }
+
+/* NAV */
+nav { display:flex; justify-content:space-between; align-items:center; padding:28px 48px; position:sticky; top:0; z-index:50; background:var(--yellow); border-bottom:1.5px solid var(--black); }
+.nav-logo { font-family:var(--serif); font-size:22px; letter-spacing:-0.02em; cursor:none; }
+.nav-logo span { color:var(--pink); font-style:italic; }
+.nav-links { display:flex; gap:8px; align-items:center; }
+.nav-btn { font-family:var(--sans); font-size:13px; font-weight:500; letter-spacing:0.05em; padding:8px 20px; border:1.5px solid var(--black); background:transparent; cursor:none; transition:background .2s, color .2s; border-radius:100px; text-decoration:none; color:var(--black); }
+.nav-btn:hover, .nav-btn.active-link { background:var(--black); color:var(--yellow); }
+.nav-btn.cta { background:var(--red); color:var(--white); border-color:var(--red); }
+.nav-btn.cta:hover { background:var(--black); border-color:var(--black); }
+
+/* BUTTONS */
+.btn-primary { padding:14px 32px; background:var(--black); color:var(--yellow); font-family:var(--sans); font-size:14px; font-weight:500; border:1.5px solid var(--black); border-radius:100px; cursor:none; transition:background .2s, transform .15s; }
+.btn-primary:hover { background:var(--red); border-color:var(--red); transform:translateY(-2px); }
+.btn-secondary { padding:14px 32px; background:transparent; color:var(--black); font-family:var(--sans); font-size:14px; font-weight:500; border:1.5px solid var(--black); border-radius:100px; cursor:none; transition:background .2s, transform .15s; }
+.btn-secondary:hover { background:var(--lime); transform:translateY(-2px); }
+
+/* HOME */
+.home-hero { flex:1; display:flex; border-bottom:1.5px solid var(--black); }
+.hero-text { padding:80px 48px 100px; display:flex; flex-direction:column; justify-content:center; max-width:760px; }
+.hero-headline { font-family:var(--serif); font-size:clamp(52px,6vw,88px); line-height:0.95; letter-spacing:-0.03em; margin-bottom:28px; animation:fadeUp .7s .1s ease both; }
+.hero-headline em { font-style:italic; color:var(--red); }
+.hero-sub { font-size:15px; font-weight:300; line-height:1.7; color:#444; max-width:380px; margin-bottom:40px; animation:fadeUp .7s .2s ease both; }
+.hero-btns { display:flex; gap:12px; flex-wrap:wrap; animation:fadeUp .7s .3s ease both; }
+.services-strip { border-top:1.5px solid var(--black); display:flex; }
+.service-item { flex:1; padding:28px 32px; border-right:1.5px solid var(--black); display:flex; align-items:center; gap:14px; transition:background .2s; }
+.service-item:last-child { border-right:none; }
+.service-item:hover { background:var(--lime); }
+.service-icon { width:36px; height:36px; border:1.5px solid var(--black); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0; background:var(--white); }
+.service-name { font-family:var(--serif); font-size:16px; }
+.service-tag { font-size:11px; color:#666; margin-top:2px; letter-spacing:0.05em; }
+
+/* WORK PAGE */
+.work-hero { padding:64px 48px 40px; border-bottom:1.5px solid var(--black); display:flex; justify-content:space-between; align-items:flex-end; }
+.work-title { font-family:var(--serif); font-size:clamp(48px,6vw,80px); line-height:0.95; letter-spacing:-0.03em; }
+.work-title em { font-style:italic; color:var(--red); }
+.work-filters { display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
+.filter-btn { padding:8px 18px; border:1.5px solid var(--black); background:transparent; font-family:var(--sans); font-size:12px; font-weight:500; letter-spacing:0.05em; border-radius:100px; cursor:none; transition:background .2s, color .2s; }
+.filter-btn.on, .filter-btn:hover { background:var(--black); color:var(--yellow); }
+.work-grid { display:grid; grid-template-columns:repeat(3,1fr); border-left:1.5px solid var(--black); }
+.work-card { border-right:1.5px solid var(--black); border-bottom:1.5px solid var(--black); overflow:hidden; cursor:none; position:relative; }
+.work-card-inner { aspect-ratio:1; display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden; transition:transform .4s ease; }
+.work-card:hover .work-card-inner { transform:scale(0.96); }
+.wc-bg { position:absolute; inset:0; transition:transform .6s cubic-bezier(.23,1,.32,1); }
+.work-card:hover .wc-bg { transform:scale(1.05); }
+.wc-overlay { position:absolute; inset:0; background:rgba(17,17,16,0.78); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:28px; opacity:0; transition:opacity .35s ease; z-index:2; gap:14px; }
+.wc-overlay p { font-size:14px; font-weight:300; line-height:1.6; color:var(--yellow); text-align:center; max-width:220px; }
+.work-card:hover .wc-overlay { opacity:1; }
+.wc-view-btn { padding:9px 22px; background:var(--yellow); color:var(--black); border:1.5px solid var(--yellow); border-radius:100px; font-family:var(--sans); font-size:12px; font-weight:600; cursor:none; transition:background .2s, transform .2s; letter-spacing:0.05em; }
+.wc-view-btn:hover { background:var(--red); border-color:var(--red); color:var(--white); transform:scale(1.05); }
+.wc3 { background:var(--green); } .wc4 { background:#f5ecd7; } .wc5 { background:var(--red); } .wc6 { background:#dce8ff; }
+.work-card-img .wc-artwork { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; transition:transform .6s cubic-bezier(.23,1,.32,1); }
+.work-card-img:hover .wc-artwork { transform:scale(1.06); }
+.work-card-label { padding:18px 22px; border-top:1.5px solid var(--black); display:flex; justify-content:space-between; align-items:center; background:var(--yellow); transition:background .2s; }
+.work-card:hover .work-card-label { background:var(--lime); }
+.wl-title { font-family:var(--serif); font-size:16px; letter-spacing:-0.01em; }
+.wl-tag { font-size:11px; letter-spacing:0.12em; text-transform:uppercase; color:#777; }
+.wl-arrow { font-size:18px; transition:transform .25s; }
+.work-card:hover .wl-arrow { transform:translate(3px,-3px); }
+
+/* ═══════════════════════════════════════════
+   LIGHTBOX WITH SLIDER
+═══════════════════════════════════════════ */
+.lb-backdrop {
+  position:fixed; inset:0;
+  background:rgba(17,17,16,0.88);
+  backdrop-filter:blur(8px);
+  z-index:200;
+  display:flex; align-items:center; justify-content:center;
+  opacity:0; pointer-events:none;
+  transition:opacity .4s ease;
+  padding:24px;
+}
+.lb-backdrop.open { opacity:1; pointer-events:all; }
+
+.lb-box {
+  background:var(--yellow);
+  border:1.5px solid var(--black);
+  border-radius:24px;
+  overflow:hidden;
+  width:100%;
+  max-width:860px;
+  max-height:calc(100vh - 48px);
+  display:flex;
+  flex-direction:column;
+  box-shadow:10px 10px 0 var(--black);
+  transform:translateY(28px) scale(0.96);
+  transition:transform .45s cubic-bezier(.23,1,.32,1);
+}
+.lb-backdrop.open .lb-box { transform:translateY(0) scale(1); }
+
+/* Top bar */
+.lb-topbar {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:18px 24px; border-bottom:1.5px solid var(--black);
+  flex-shrink:0; background:var(--yellow);
+}
+.lb-project-info {}
+.lb-tag { font-size:10px; letter-spacing:0.2em; text-transform:uppercase; font-weight:600; color:#888; margin-bottom:2px; }
+.lb-title { font-family:var(--serif); font-size:20px; letter-spacing:-0.02em; }
+.lb-close {
+  width:40px; height:40px; border:1.5px solid var(--black); border-radius:50%;
+  background:var(--white); display:flex; align-items:center; justify-content:center;
+  font-size:18px; cursor:none; flex-shrink:0;
+  transition:background .2s, transform .25s;
+}
+.lb-close:hover { background:var(--red); color:white; transform:rotate(90deg); }
+
+/* Slider area */
+.lb-slider-wrap {
+  position:relative;
+  overflow:hidden;
+  background:#111;
+  flex-shrink:0;
+  /* height adapts to image but capped */
+  height:480px;
+}
+@media(max-height:700px){ .lb-slider-wrap { height:300px; } }
+
+.lb-slides {
+  display:flex;
+  height:100%;
+  transition:transform .5s cubic-bezier(.23,1,.32,1);
+  will-change:transform;
+}
+.lb-slide {
+  min-width:100%; height:100%;
+  display:flex; align-items:center; justify-content:center;
+  overflow:hidden;
+}
+.lb-slide img {
+  width:100%; height:100%;
+  object-fit:contain;
+  display:block;
+  user-select:none; pointer-events:none;
+  /* ensure image is always visible */
+  background:transparent;
+}
+
+/* Arrows */
+.lb-arrow {
+  position:absolute; top:50%; transform:translateY(-50%);
+  width:48px; height:48px;
+  background:var(--yellow); border:1.5px solid var(--black); border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:20px; cursor:none; z-index:5;
+  transition:background .2s, transform .2s, opacity .2s;
+  box-shadow:3px 3px 0 var(--black);
+}
+.lb-arrow:hover { background:var(--black); color:var(--yellow); }
+.lb-arrow.prev { left:16px; }
+.lb-arrow.next { right:16px; }
+.lb-arrow.lb-arrow:hover { transform:translateY(-50%) scale(1.06); }
+.lb-arrow.disabled { opacity:0.2; pointer-events:none; }
+
+/* Counter badge */
+.lb-counter {
+  position:absolute; top:14px; right:16px; z-index:5;
+  font-size:11px; font-weight:600; letter-spacing:0.1em;
+  color:rgba(255,255,255,0.8);
+  background:rgba(0,0,0,0.45); padding:4px 12px; border-radius:100px;
+}
+
+/* Dot indicators */
+.lb-dots {
+  position:absolute; bottom:16px; left:50%; transform:translateX(-50%);
+  display:flex; gap:8px; z-index:5;
+}
+.lb-dot {
+  width:9px; height:9px; border-radius:50%;
+  background:rgba(255,255,255,0.35);
+  border:1.5px solid rgba(255,255,255,0.55);
+  cursor:none; transition:background .25s, transform .25s;
+}
+.lb-dot.active { background:var(--yellow); transform:scale(1.35); }
+
+/* Caption strip */
+.lb-caption {
+  padding:14px 24px; border-bottom:1.5px solid var(--black);
+  flex-shrink:0; background:var(--lime);
+  display:flex; align-items:center; min-height:50px;
+}
+.lb-caption-text {
+  font-size:13px; line-height:1.5; color:#333;
+  transition:opacity .2s ease;
+}
+.lb-caption-text.fade { opacity:0; }
+
+/* Bottom info row */
+.lb-bottom {
+  padding:20px 24px;
+  flex-shrink:0;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:16px;
+  background:var(--yellow);
+}
+
+/* Thumbnail strip */
+.lb-thumbs {
+  display:flex; gap:10px; overflow-x:auto;
+}
+.lb-thumbs::-webkit-scrollbar { height:3px; }
+.lb-thumbs::-webkit-scrollbar-thumb { background:var(--black); border-radius:2px; }
+.lb-thumb {
+  width:60px; height:60px; flex-shrink:0;
+  border:1.5px solid var(--black); border-radius:8px;
+  overflow:hidden; cursor:none;
+  transition:transform .2s, box-shadow .2s, border-color .2s;
+  background:#000;
+}
+.lb-thumb img { width:100%; height:100%; object-fit:cover; }
+.lb-thumb:hover { transform:translateY(-2px); box-shadow:3px 3px 0 var(--black); }
+.lb-thumb.active { border-color:var(--red); box-shadow:3px 3px 0 var(--red); }
+
+.lb-collab-btn {
+  padding:12px 24px; background:var(--black); color:var(--yellow);
+  font-family:var(--sans); font-size:12px; font-weight:500;
+  border:1.5px solid var(--black); border-radius:100px;
+  cursor:none; transition:background .2s, transform .15s;
+  white-space:nowrap; flex-shrink:0;
+}
+.lb-collab-btn:hover { background:var(--red); border-color:var(--red); transform:translateY(-2px); }
+
+/* ABOUT */
+.about-layout { flex:1; display:grid; grid-template-columns:1fr 1fr; }
+.about-left { padding:64px 48px; border-right:1.5px solid var(--black); }
+.about-hi { font-family:var(--serif); font-size:clamp(42px,5vw,72px); line-height:0.95; letter-spacing:-0.03em; margin-bottom:32px; }
+.about-hi em { font-style:italic; color:var(--red); }
+.about-body { font-size:15px; font-weight:300; line-height:1.8; color:#333; max-width:440px; margin-bottom:40px; }
+.about-pills { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:40px; }
+.pill { padding:7px 16px; border:1.5px solid var(--black); border-radius:100px; font-size:12px; font-weight:500; letter-spacing:0.05em; background:var(--white); transition:background .2s; }
+.pill:hover { background:var(--lime); }
+.pill.pink { background:var(--pink); } .pill.green { background:var(--green); } .pill.lime { background:var(--lime); }
+.about-right { background:var(--lime); padding:64px 48px; display:flex; flex-direction:column; justify-content:space-between; }
+.about-visual { display:flex; justify-content:center; align-items:center; flex:1; position:relative; }
+.avi-circle { width:240px; height:240px; border-radius:50%; background:var(--green); border:1.5px solid var(--black); display:flex; align-items:center; justify-content:center; font-family:var(--serif); font-style:italic; font-size:28px; animation:float1 5s ease-in-out infinite; }
+.fun-facts { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:40px; }
+.fact { background:var(--white); border:1.5px solid var(--black); padding:16px 18px; border-radius:12px; }
+.fact-num { font-family:var(--serif); font-size:32px; letter-spacing:-0.03em; line-height:1; color:var(--red); }
+.fact-label { font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:#666; margin-top:4px; }
+
+/* CONTACT */
+.contact-layout { flex:1; display:grid; grid-template-columns:1fr 1fr; }
+.contact-left { padding:64px 48px; border-right:1.5px solid var(--black); display:flex; flex-direction:column; justify-content:space-between; }
+.contact-h { font-family:var(--serif); font-size:clamp(42px,5vw,72px); line-height:0.95; letter-spacing:-0.03em; margin-bottom:20px; }
+.contact-h em { font-style:italic; color:var(--red); }
+.contact-sub { font-size:15px; font-weight:300; line-height:1.7; color:#444; max-width:380px; margin-bottom:48px; }
+.contact-links-list { display:flex; flex-direction:column; }
+.clink { display:flex; justify-content:space-between; align-items:center; padding:22px 0; border-bottom:1.5px solid var(--black); text-decoration:none; color:var(--black); font-family:var(--serif); font-size:20px; transition:padding-left .3s, color .2s; cursor:none; }
+.clink:hover { padding-left:10px; color:var(--red); }
+.clink:first-child { border-top:1.5px solid var(--black); }
+.clink-arr { font-size:18px; transition:transform .25s; }
+.clink:hover .clink-arr { transform:translate(4px,-4px); }
+.availability { display:flex; align-items:center; gap:10px; margin-top:40px; font-size:13px; font-weight:500; padding:14px 20px; background:var(--lime); border:1.5px solid var(--black); border-radius:100px; width:fit-content; }
+.avail-dot { width:8px; height:8px; background:var(--green); border-radius:50%; animation:pulse 2s ease-in-out infinite; }
+.contact-right { background:var(--pink); padding:64px 48px; display:flex; flex-direction:column; justify-content:center; gap:16px; }
+.contact-form-label { font-size:11px; letter-spacing:0.2em; text-transform:uppercase; font-weight:500; margin-bottom:4px; display:block; }
+.contact-input, .contact-textarea { width:100%; padding:14px 18px; border:1.5px solid var(--black); background:var(--white); font-family:var(--sans); font-size:14px; border-radius:10px; outline:none; transition:border-color .2s, box-shadow .2s; cursor:none; resize:none; }
+.contact-input:focus, .contact-textarea:focus { border-color:var(--red); box-shadow:3px 3px 0 var(--red); }
+.contact-textarea { min-height:120px; }
+.form-row { display:flex; gap:12px; }
+.form-row > div { flex:1; }
+.submit-btn { padding:16px 36px; background:var(--black); color:var(--yellow); font-family:var(--sans); font-size:14px; font-weight:500; border:1.5px solid var(--black); border-radius:100px; cursor:none; transition:background .2s, transform .15s; width:100%; margin-top:4px; }
+.submit-btn:hover { background:var(--red); border-color:var(--red); transform:translateY(-2px); }
+
+/* MARQUEE */
+.marquee-bar { border-top:1.5px solid var(--black); border-bottom:1.5px solid var(--black); background:var(--green); overflow:hidden; padding:14px 0; }
+.marquee-inner { display:flex; gap:40px; animation:marquee 16s linear infinite; width:max-content; }
+.marquee-inner span { font-family:var(--serif); font-style:italic; font-size:15px; color:var(--black); white-space:nowrap; }
+.msep { opacity:0.4; }
+
+footer { border-top:1.5px solid var(--black); padding:24px 48px; display:flex; justify-content:space-between; align-items:center; font-size:12px; color:#666; background:var(--yellow); }
+
+/* ANIMATIONS */
+@keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+@keyframes float1 { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+@keyframes float2 { 0%,100%{transform:translateY(0) rotate(0deg)} 50%{transform:translateY(-8px) rotate(5deg)} }
+@keyframes marquee { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.4)} }
+
+/* RESPONSIVE */
+@media(max-width:860px) {
+  nav { padding:20px 24px; }
+  .hero-text { padding:40px 24px; }
+  .services-strip { flex-direction:column; }
+  .service-item { border-right:none; border-bottom:1.5px solid var(--black); }
+  .work-hero { flex-direction:column; gap:24px; padding:40px 24px; align-items:flex-start; }
+  .work-grid { grid-template-columns:1fr 1fr; }
+  .about-layout, .contact-layout { grid-template-columns:1fr; }
+  .about-left, .contact-left { border-right:none; border-bottom:1.5px solid var(--black); padding:40px 24px; }
+  .about-right, .contact-right { padding:40px 24px; }
+  footer { padding:20px 24px; flex-direction:column; gap:8px; text-align:center; }
+  .form-row { flex-direction:column; }
+  .lb-slider-wrap { height:300px; }
+  .lb-bottom { flex-direction:column; align-items:flex-start; }
+}
+@media(max-width:560px) {
+  .work-grid { grid-template-columns:1fr; }
+  .nav-links .nav-btn:not(.cta) { display:none; }
+  .lb-slider-wrap { height:240px; }
+}
+</style>
+</head>
+<body>
+
+<div class="dot" id="dot"></div>
+<div class="ring" id="ring"></div>
+
+<!-- ══════════ LIGHTBOX ══════════ -->
+<div class="lb-backdrop" id="lbBackdrop">
+  <!-- clicking outside the box closes it -->
+  <div class="lb-box" id="lbBox">
+
+    <div class="lb-topbar">
+      <div class="lb-project-info">
+        <div class="lb-tag" id="lbTag"></div>
+        <div class="lb-title" id="lbTitleEl"></div>
+      </div>
+      <button class="lb-close" id="lbClose">✕</button>
+    </div>
+
+    <div class="lb-slider-wrap">
+      <div class="lb-slides" id="lbSlides"></div>
+      <button class="lb-arrow prev disabled" id="lbPrev">←</button>
+      <button class="lb-arrow next" id="lbNext">→</button>
+      <div class="lb-dots" id="lbDots"></div>
+      <div class="lb-counter" id="lbCounter">1 / 1</div>
+    </div>
+
+    <div class="lb-caption">
+      <div class="lb-caption-text" id="lbCaption"></div>
+    </div>
+
+    <div class="lb-bottom">
+      <div class="lb-thumbs" id="lbThumbs"></div>
+      <button class="lb-collab-btn" id="lbCollabBtn">Want something like this? Let's collab ✦</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════ HOME ══════════ -->
+<div class="page active" id="page-home">
+  <nav>
+    <div class="nav-logo">pok<span>amiami</span></div>
+    <div class="nav-links">
+      <button class="nav-btn active-link" onclick="goto('home')">Home</button>
+      <button class="nav-btn" onclick="goto('work')">Work</button>
+      <button class="nav-btn" onclick="goto('about')">About</button>
+      <button class="nav-btn cta" onclick="goto('contact')">Contact me</button>
+    </div>
+  </nav>
+  <div class="home-hero">
+    <div class="hero-text">
+      <h1 class="hero-headline">When minimalist<br/>brings <em>fun.</em></h1>
+      <p class="hero-sub">Hai, aku Amira Hanifa, desainer grafis & ilustrator yang mencintai garis bersih dan ide-ide penuh kesenangan. Dikenal sebagai <strong>pokamiami</strong>, aku mengubah visimu jadi karya dengan jiwa minimalis.</p>
+      <div class="hero-btns">
+        <button class="btn-primary" onclick="goto('work')">See my work →</button>
+        <button class="btn-secondary" onclick="goto('contact')">Let's collab ✦</button>
+      </div>
+    </div>
+  </div>
+  <div class="marquee-bar">
+    <div class="marquee-inner">
+      <span>Brand Design</span><span class="msep">✦</span><span>Mascot Design</span><span class="msep">✦</span><span>Typography</span><span class="msep">✦</span><span>Minimalist</span><span class="msep">✦</span><span>Print Design</span><span class="msep">✦</span>
+      <span>Brand Design</span><span class="msep">✦</span><span>Mascot Design</span><span class="msep">✦</span><span>Typography</span><span class="msep">✦</span><span>Minimalist</span><span class="msep">✦</span><span>Print Design</span><span class="msep">✦</span>
+    </div>
+  </div>
+  <div class="services-strip">
+    <div class="service-item"><div class="service-icon">⬡</div><div><div class="service-name">Brand Design</div><div class="service-tag">Identity · Logo · System</div></div></div>
+    <div class="service-item"><div class="service-icon" style="background:var(--lime)">◉</div><div><div class="service-name">Mascot Design</div><div class="service-tag">Character · Ilustrasi</div></div></div>
+    <div class="service-item"><div class="service-icon" style="background:var(--pink)">Aa</div><div><div class="service-name">Typography</div><div class="service-tag">Tipografi · Lettering · Tata Letak</div></div></div>
+    <div class="service-item"><div class="service-icon" style="background:var(--green)">✦</div><div><div class="service-name">Commissions</div><div class="service-tag">Any style · Your vision</div></div></div>
+  </div>
+  <footer><span>© 2025 pokamiami — amira hanifa</span><span>graphic design & illustration</span></footer>
+</div>
+
+<!-- ══════════ WORK ══════════ -->
+<div class="page" id="page-work">
+  <nav>
+    <div class="nav-logo">pok<span>amiami</span></div>
+    <div class="nav-links">
+      <button class="nav-btn" onclick="goto('home')">Home</button>
+      <button class="nav-btn active-link" onclick="goto('work')">Work</button>
+      <button class="nav-btn" onclick="goto('about')">About</button>
+      <button class="nav-btn cta" onclick="goto('contact')">Contact me</button>
+    </div>
+  </nav>
+  <div class="work-hero">
+    <h2 class="work-title">Work<br/><em>Selected.</em></h2>
+    <div class="work-filters">
+      <button class="filter-btn on" onclick="filterWork(this,'all')">All</button>
+      <button class="filter-btn" onclick="filterWork(this,'brand')">Brand</button>
+      <button class="filter-btn" onclick="filterWork(this,'mascot')">Mascot</button>
+      <button class="filter-btn" onclick="filterWork(this,'type')">Typography</button>
+    </div>
+  </div>
+
+  <div class="work-grid">
+
+    <!-- CLAYTASTIC — real photo card -->
+    <div class="work-card work-card-img" data-cat="brand" onclick="openLightbox('claytastic')">
+      <div class="work-card-inner">
+        <img class="wc-artwork" src="images/Asset_141.png" alt="Claytastic"/>
+        <div class="wc-overlay">
+          <p>Clay accessories brand — playful, calm, and full of personality.</p>
+          <button class="wc-view-btn">View project ↗</button>
+        </div>
+      </div>
+      <div class="work-card-label">
+        <div><div class="wl-title">Claytastic</div><div class="wl-tag">Brand Identity — Logo</div></div>
+        <div class="wl-arrow">↗</div>
+      </div>
+    </div>
+
+    <!-- placeholder cards -->
+    <div class="work-card" data-cat="mascot">
+      <div class="work-card-inner">
+        <div class="wc-bg" style="background:var(--pink);position:absolute;inset:0;"></div>
+        <svg width="110" height="130" viewBox="0 0 110 130" style="position:relative;z-index:1" fill="none">
+          <ellipse cx="55" cy="58" rx="38" ry="36" fill="#F6FAB9" stroke="#111" stroke-width="1.5"/>
+          <circle cx="42" cy="52" r="6" fill="#111"/><circle cx="68" cy="52" r="6" fill="#111"/>
+          <circle cx="44" cy="50" r="2" fill="white"/><circle cx="70" cy="50" r="2" fill="white"/>
+          <path d="M42 66 Q55 76 68 66" stroke="#111" stroke-width="1.5" stroke-linecap="round"/>
+          <ellipse cx="20" cy="48" rx="8" ry="12" fill="#F6FAB9" stroke="#111" stroke-width="1.5"/>
+          <ellipse cx="90" cy="48" rx="8" ry="12" fill="#F6FAB9" stroke="#111" stroke-width="1.5"/>
+          <ellipse cx="55" cy="104" rx="28" ry="20" fill="#FF748B" stroke="#111" stroke-width="1.5"/>
+          <ellipse cx="34" cy="63" rx="7" ry="4" fill="#FF748B" opacity="0.5"/>
+          <ellipse cx="76" cy="63" rx="7" ry="4" fill="#FF748B" opacity="0.5"/>
+        </svg>
+        <div class="wc-overlay"><p>Cute bunny mascot for a playful brand.</p></div>
+      </div>
+      <div class="work-card-label"><div><div class="wl-title">Bunbun Mascot</div><div class="wl-tag">Mascot Design</div></div><div class="wl-arrow">↗</div></div>
+    </div>
+
+    <div class="work-card" data-cat="type">
+      <div class="work-card-inner">
+        <div class="wc-bg wc3" style="position:absolute;inset:0;"></div>
+        <div style="position:relative;z-index:1;text-align:center;line-height:1;">
+          <div style="font-family:'Bricolage Grotesque',sans-serif;font-size:64px;letter-spacing:-0.04em;color:#111;">Aa</div>
+          <div style="font-family:'Bricolage Grotesque',sans-serif;font-style:italic;font-size:18px;color:#111;margin-top:4px;letter-spacing:0.05em;">typeplay</div>
+        </div>
+        <div class="wc-overlay"><p>Typography exploration — scale, weight, rhythm.</p></div>
+      </div>
+      <div class="work-card-label"><div><div class="wl-title">Typeplay Series</div><div class="wl-tag">Typography</div></div><div class="wl-arrow">↗</div></div>
+    </div>
+
+    <div class="work-card" data-cat="mascot">
+      <div class="work-card-inner">
+        <div class="wc-bg wc4" style="position:absolute;inset:0;"></div>
+        <svg width="120" height="130" viewBox="0 0 120 130" style="position:relative;z-index:1" fill="none">
+          <ellipse cx="60" cy="72" rx="36" ry="34" fill="#E4F1AC" stroke="#111" stroke-width="1.5"/>
+          <polygon points="28,46 18,20 42,36" fill="#E4F1AC" stroke="#111" stroke-width="1.5" stroke-linejoin="round"/>
+          <polygon points="92,46 102,20 78,36" fill="#E4F1AC" stroke="#111" stroke-width="1.5" stroke-linejoin="round"/>
+          <polygon points="30,44 22,26 38,38" fill="#FF748B" opacity="0.6"/>
+          <polygon points="90,44 98,26 82,38" fill="#FF748B" opacity="0.6"/>
+          <ellipse cx="47" cy="66" rx="6" ry="7" fill="#111"/><ellipse cx="73" cy="66" rx="6" ry="7" fill="#111"/>
+          <circle cx="49" cy="64" r="2" fill="white"/><circle cx="75" cy="64" r="2" fill="white"/>
+          <path d="M57 76 L60 79 L63 76" fill="#F72C5B"/>
+          <line x1="20" y1="74" x2="48" y2="77" stroke="#111" stroke-width="1"/><line x1="72" y1="77" x2="100" y2="74" stroke="#111" stroke-width="1"/>
+          <line x1="22" y1="80" x2="48" y2="80" stroke="#111" stroke-width="1"/><line x1="72" y1="80" x2="98" y2="80" stroke="#111" stroke-width="1"/>
+          <ellipse cx="60" cy="112" rx="28" ry="16" fill="#A7D477" stroke="#111" stroke-width="1.5"/>
+        </svg>
+        <div class="wc-overlay"><p>Kiko — a friendly cat mascot full of warmth.</p></div>
+      </div>
+      <div class="work-card-label"><div><div class="wl-title">Kiko the Cat</div><div class="wl-tag">Mascot Design</div></div><div class="wl-arrow">↗</div></div>
+    </div>
+
+    <div class="work-card" data-cat="brand">
+      <div class="work-card-inner">
+        <div class="wc-bg wc5" style="position:absolute;inset:0;"></div>
+        <svg width="120" height="80" viewBox="0 0 120 80" style="position:relative;z-index:1" fill="none">
+          <rect x="10" y="10" width="44" height="44" rx="22" fill="#F6FAB9" stroke="#111" stroke-width="1.5"/>
+          <rect x="66" y="10" width="44" height="44" rx="4" fill="#111"/>
+          <text x="78" y="40" font-family="'Bricolage Grotesque',sans-serif" font-size="20" fill="#F6FAB9">ok.</text>
+          <line x1="10" y1="66" x2="110" y2="66" stroke="#111" stroke-width="1.5"/>
+        </svg>
+        <div class="wc-overlay"><p>Clean, confident identity for okay. Studio.</p></div>
+      </div>
+      <div class="work-card-label"><div><div class="wl-title">okay. Studio Logo</div><div class="wl-tag">Brand Identity</div></div><div class="wl-arrow">↗</div></div>
+    </div>
+
+    <div class="work-card" data-cat="type">
+      <div class="work-card-inner">
+        <div class="wc-bg wc6" style="position:absolute;inset:0;"></div>
+        <div style="position:relative;z-index:1;text-align:center;">
+          <div style="font-family:'Bricolage Grotesque',sans-serif;font-size:36px;font-style:italic;color:#111;letter-spacing:-0.02em;line-height:1.1;">hello<br/><span style="font-style:normal;font-size:42px;">world</span></div>
+        </div>
+        <div class="wc-overlay"><p>A poster celebrating the joy of type.</p></div>
+      </div>
+      <div class="work-card-label"><div><div class="wl-title">Hello World Poster</div><div class="wl-tag">Typography</div></div><div class="wl-arrow">↗</div></div>
+    </div>
+
+  </div>
+  <footer><span>© 2025 pokamiami — amira hanifa</span><span>graphic design & illustration</span></footer>
+</div>
+
+<!-- ══════════ ABOUT ══════════ -->
+<div class="page" id="page-about">
+  <nav>
+    <div class="nav-logo">pok<span>amiami</span></div>
+    <div class="nav-links">
+      <button class="nav-btn" onclick="goto('home')">Home</button>
+      <button class="nav-btn" onclick="goto('work')">Work</button>
+      <button class="nav-btn active-link" onclick="goto('about')">About</button>
+      <button class="nav-btn cta" onclick="goto('contact')">Contact me</button>
+    </div>
+  </nav>
+  <div class="about-layout">
+    <div class="about-left">
+      <div>
+        <h2 class="about-hi">Hey, I'm<br/><em>Amira.</em></h2>
+        <p class="about-body">I'm a graphic designer based in Indonesia, working under the name <strong>pokamiami</strong>. My work lives in the space between simplicity and personality — where a single shape can say everything.</p>
+        <p class="about-body" style="margin-top:-16px;">I specialize in brand design, mascot illustration, and typography. Even when taking commissions outside my usual style, aku selalu menemukan cara untuk menghadirkan estetika bersih dan penuh pertimbangan ke setiap proyek.</p>
+        <div class="about-pills">
+          <span class="pill lime">Brand Identity</span><span class="pill green">Mascot Design</span><span class="pill pink">Typography</span><span class="pill">Print Design</span>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:12px;letter-spacing:0.15em;text-transform:uppercase;color:#888;margin-bottom:16px;">Tools I use</div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;">
+          <span class="pill">Adobe Illustrator</span><span class="pill">Adobe Photoshop</span><span class="pill">Affinity Design</span><span class="pill">Canva</span><span class="pill">Lightroom</span>
+        </div>
+      </div>
+    </div>
+    <div class="about-right">
+      <div class="about-visual">
+        <div style="position:absolute;top:20px;right:20px;width:48px;height:48px;background:var(--pink);border-radius:50%;border:1.5px solid var(--black);animation:float2 4s ease-in-out infinite;"></div>
+        <div style="position:absolute;bottom:30px;left:20px;width:32px;height:32px;background:var(--red);border-radius:50%;border:1.5px solid var(--black);animation:float1 5s 1s ease-in-out infinite;"></div>
+        <div class="avi-circle"><span style="color:var(--black)">pokamiami ✦</span></div>
+      </div>
+      <div class="fun-facts">
+        <div class="fact"><div class="fact-num">3+</div><div class="fact-label">Years designing</div></div>
+        <div class="fact"><div class="fact-num">50+</div><div class="fact-label">Projects done</div></div>
+        <div class="fact"><div class="fact-num">∞</div><div class="fact-label">Love for minimal</div></div>
+        <div class="fact"><div class="fact-num">✦</div><div class="fact-label">Always curious</div></div>
+      </div>
+    </div>
+  </div>
+  <footer><span>© 2025 pokamiami — amira hanifa</span><span>graphic design & illustration</span></footer>
+</div>
+
+<!-- ══════════ CONTACT ══════════ -->
+<div class="page" id="page-contact">
+  <nav>
+    <div class="nav-logo">pok<span>amiami</span></div>
+    <div class="nav-links">
+      <button class="nav-btn" onclick="goto('home')">Home</button>
+      <button class="nav-btn" onclick="goto('work')">Work</button>
+      <button class="nav-btn" onclick="goto('about')">About</button>
+      <button class="nav-btn cta active-link" onclick="goto('contact')">Contact me</button>
+    </div>
+  </nav>
+  <div class="contact-layout">
+    <div class="contact-left">
+      <div>
+        <h2 class="contact-h">Let's work<br/><em>together.</em></h2>
+        <p class="contact-sub">Have a project in mind? I'm open to commissions of all kinds. I'll bring your idea to life — minimalist style or anything you envision.</p>
+        <div class="contact-links-list">
+          <a href="mailto:pokamiami@gmail.com" class="clink">pokamiami@gmail.com <span class="clink-arr">↗</span></a>
+          <a href="https://instagram.com/pokamiamie__" target="_blank" class="clink">@pokamiamie__ on Instagram <span class="clink-arr">↗</span></a>
+          <a href="https://wa.me/628774551439" target="_blank" class="clink">WhatsApp — 0877-4551-439 <span class="clink-arr">↗</span></a>
+        </div>
+        <div class="availability"><div class="avail-dot"></div>Currently open for new projects</div>
+      </div>
+    </div>
+    <div class="contact-right">
+      <div style="font-size:11px;letter-spacing:0.2em;text-transform:uppercase;font-weight:600;margin-bottom:4px;">Send me a message</div>
+      <div class="form-row">
+        <div><label class="contact-form-label">Name</label><input class="contact-input" type="text" placeholder="Your name"/></div>
+        <div><label class="contact-form-label">Email</label><input class="contact-input" type="email" placeholder="your@email.com"/></div>
+      </div>
+      <div><label class="contact-form-label">Project type</label><input class="contact-input" type="text" placeholder="Brand design, mascot, etc."/></div>
+      <div><label class="contact-form-label">Tell me about your project</label><textarea class="contact-textarea" placeholder="Describe your vision, vibe, references…"></textarea></div>
+      <button class="submit-btn" onclick="this.textContent='✦ Sent! I\'ll be in touch ✦'">Send me a message →</button>
+    </div>
+  </div>
+  <footer><span>© 2025 pokamiami — amira hanifa</span><span>graphic design & illustration</span></footer>
+</div>
+
+<script>
+/* ── Cursor ── */
+const dot = document.getElementById('dot');
+const ring = document.getElementById('ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{ mx=e.clientX; my=e.clientY; dot.style.left=mx+'px'; dot.style.top=my+'px'; });
+(function loop(){ rx+=(mx-rx)*0.11; ry+=(my-ry)*0.11; ring.style.left=rx+'px'; ring.style.top=ry+'px'; requestAnimationFrame(loop); })();
+function bindCursor(){
+  document.querySelectorAll('button,a,.work-card,.service-item,.clink,.pill,.fact,.lb-thumb,.lb-arrow,.lb-close,.lb-collab-btn').forEach(el=>{
+    el.addEventListener('mouseenter',()=>{ dot.style.transform='translate(-50%,-50%) scale(2.5)'; ring.style.opacity='0'; });
+    el.addEventListener('mouseleave',()=>{ dot.style.transform='translate(-50%,-50%) scale(1)'; ring.style.opacity='1'; });
+  });
+}
+bindCursor();
+
+/* ── Navigation ── */
+function goto(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+/* ── Work filter ── */
+function filterWork(btn,cat){
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  document.querySelectorAll('.work-card').forEach(c=>{ c.style.display=(cat==='all'||c.dataset.cat===cat)?'':'none'; });
+}
+
+/* ── Project data ── */
+const PROJECTS = {
+  claytastic: {
+    title:'Claytastic',
+    tag:'Brand Identity — Logo',
+    slides:[
+      { src:'images/Asset_141.png',         caption:'Main logo — clean version on lime background' },
+      { src:'images/Artboard_1.png',         caption:'Brand intro — "Kenalan yuk sama Claytastic"' },
+      { src:'images/Artboard_1_copy.png',    caption:'Brand philosophy & story' },
+    ]
+  }
+};
+
+/* ── Lightbox state ── */
+let curSlide = 0;
+let curSlides = [];
+
+function openLightbox(id){
+  const p = PROJECTS[id];
+  if(!p) return;
+  curSlides = p.slides;
+  curSlide = 0;
+
+  document.getElementById('lbTag').textContent = p.tag;
+  document.getElementById('lbTitleEl').textContent = p.title;
+
+  /* Build slides */
+  const slidesWrap = document.getElementById('lbSlides');
+  slidesWrap.innerHTML = '';
+  p.slides.forEach(s=>{
+    const div = document.createElement('div');
+    div.className = 'lb-slide';
+    const img = document.createElement('img');
+    img.src = s.src;
+    img.alt = s.caption;
+    div.appendChild(img);
+    slidesWrap.appendChild(div);
+  });
+
+  /* Build dots */
+  const dotsWrap = document.getElementById('lbDots');
+  dotsWrap.innerHTML = '';
+  p.slides.forEach((_,i)=>{
+    const d = document.createElement('div');
+    d.className = 'lb-dot';
+    d.onclick = ()=>goSlide(i);
+    dotsWrap.appendChild(d);
+  });
+
+  /* Build thumbnails */
+  const thumbsWrap = document.getElementById('lbThumbs');
+  thumbsWrap.innerHTML = '';
+  p.slides.forEach((s,i)=>{
+    const t = document.createElement('div');
+    t.className = 'lb-thumb';
+    t.onclick = ()=>goSlide(i);
+    const img = document.createElement('img');
+    img.src = s.src;
+    img.alt = s.caption;
+    t.appendChild(img);
+    thumbsWrap.appendChild(t);
+  });
+
+  updateSlider();
+
+  /* Open */
+  const backdrop = document.getElementById('lbBackdrop');
+  backdrop.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  bindCursor();
+}
+
+function closeLightbox(){
+  document.getElementById('lbBackdrop').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function goSlide(i){
+  curSlide = Math.max(0, Math.min(i, curSlides.length-1));
+  updateSlider();
+}
+function slideMove(dir){ goSlide(curSlide+dir); }
+
+function updateSlider(){
+  document.getElementById('lbSlides').style.transform = `translateX(-${curSlide*100}%)`;
+  document.getElementById('lbCounter').textContent = `${curSlide+1} / ${curSlides.length}`;
+
+  /* Caption fade */
+  const cap = document.getElementById('lbCaption');
+  cap.classList.add('fade');
+  setTimeout(()=>{ cap.textContent = curSlides[curSlide]?.caption||''; cap.classList.remove('fade'); }, 180);
+
+  /* Dots */
+  document.querySelectorAll('.lb-dot').forEach((d,i)=>d.classList.toggle('active', i===curSlide));
+
+  /* Thumbs */
+  document.querySelectorAll('.lb-thumb').forEach((t,i)=>{
+    t.classList.toggle('active', i===curSlide);
+    if(i===curSlide) t.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+  });
+
+  /* Arrows */
+  document.getElementById('lbPrev').classList.toggle('disabled', curSlide===0);
+  document.getElementById('lbNext').classList.toggle('disabled', curSlide===curSlides.length-1);
+}
+
+/* Close on backdrop click (but not box click) */
+document.getElementById('lbBackdrop').addEventListener('click', function(e){
+  if(e.target === this) closeLightbox();
+});
+
+/* Arrow buttons */
+document.getElementById('lbPrev').addEventListener('click', ()=>slideMove(-1));
+document.getElementById('lbNext').addEventListener('click', ()=>slideMove(1));
+document.getElementById('lbClose').addEventListener('click', closeLightbox);
+
+/* Collab button */
+document.getElementById('lbCollabBtn').addEventListener('click', ()=>{ closeLightbox(); goto('contact'); });
+
+/* Keyboard */
+document.addEventListener('keydown',e=>{
+  if(!document.getElementById('lbBackdrop').classList.contains('open')) return;
+  if(e.key==='ArrowRight') slideMove(1);
+  if(e.key==='ArrowLeft')  slideMove(-1);
+  if(e.key==='Escape')     closeLightbox();
+});
+
+/* Touch swipe */
+let touchX = 0;
+document.getElementById('lbSlides').addEventListener('touchstart',e=>{ touchX=e.touches[0].clientX; },{passive:true});
+document.getElementById('lbSlides').addEventListener('touchend',e=>{
+  const diff = touchX - e.changedTouches[0].clientX;
+  if(Math.abs(diff)>40) slideMove(diff>0?1:-1);
+});
+</script>
+</body>
+</html>
